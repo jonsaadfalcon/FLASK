@@ -80,9 +80,9 @@ if not perform_ensembling:
         print(f"Generating candidates for model: {model_name}")
         
         model_id = model_name.split("/")[1]
-        saved_jsonl_path = f"data/mt_bench/model_answer/{model_id}.jsonl"
-        if not os.path.exists(saved_jsonl_path):
-            candidate_generation_command = f"python inference.py --model-path {model_name} --model-id {model_id} --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file {output_dir} --num-gpus 1"
+        answer_file = f"{output_dir}/{model_id}.jsonl"
+        if not os.path.exists(answer_file):
+            candidate_generation_command = f"python inference.py --model-path {model_name} --model-id {model_id} --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file {answer_file} --num-gpus 1"
             candidate_generation_command += f" --model-type TogetherAI --num-choices {generation_dict['candidates_per_temp'][0]}"
 
             print("Generation Command: ", candidate_generation_command)
@@ -93,7 +93,7 @@ if not perform_ensembling:
                     print(line, end='')  # Print the output in real-time
 
         else:
-            print(f"Model {model_name} already has candidates generated. Already saved to: {saved_jsonl_path}")
+            print(f"Model {model_name} already has candidates generated. Already saved to: {answer_file}")
 
         ##########################################
 
