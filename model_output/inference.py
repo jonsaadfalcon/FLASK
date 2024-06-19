@@ -139,6 +139,7 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
 
             ############################
 
+            instruction = qs
             system_prompt = conv.system
             previous_turns = {"first_instruction": conv.messages[0][1],
                               "system_response": conv.messages[1][1]}
@@ -147,11 +148,11 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
             
             total_candidates = []
             for i in range(num_choices):
-                output = generate_candidates_with_together_api(instruction=prompt, 
-                                                            model=model_path, 
-                                                            temperature=temperature,
-                                                            previous_turns=previous_turns,
-                                                            system_prompt=system_prompt)
+                output = generate_candidates_with_together_api(instruction=instruction, 
+                                                               model=model_path, 
+                                                               temperature=temperature,
+                                                               previous_turns=previous_turns,
+                                                               system_prompt=system_prompt)
                 total_candidates.append(output)
 
             ############################
