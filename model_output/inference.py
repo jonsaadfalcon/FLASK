@@ -7,6 +7,47 @@ from tqdm import tqdm
 import ray
 from load_model import get_conversation_template
 
+from together import Together
+
+##################################################
+
+def generate_candidates_with_together_api(instruction:str, 
+                                          model: str, 
+                                          temperature: float,
+                                          previous_turns: dict = None):
+    
+    client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+
+    system_prompt = "You are an expert chatbot, capable of instruction-following and question-answering. You are tasked with following the given instruction for the provided input."
+    user_prompt = instruction
+
+    ###################################
+
+    if previous_turns is None:
+        messages = [{"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}]
+    else:
+        messages = [{"role": "system", "content": system_prompt},
+                    {"role": "user", "content": previous_turns["first_instruction"]},
+                    {"role": "system", "content": previous_turns["system_response"]},
+                    {"role": "user", "content": user_prompt}]
+        
+    #print("Messages: ", messages)
+
+    response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                #top_p=generation_dict['top_p'],
+                #top_k=generation_dict['top_k'],
+            )
+
+    output = response.choices[0].message.content
+
+    return output
+
+##################################################
+
 def disable_torch_init():
     """
     Disable the redundant torch default initialization to accelerate model creation.
@@ -42,7 +83,7 @@ def run_eval(model_path, model_id, question_file, answer_file, num_gpus, model_t
 
 #@ray.remote(num_gpus=1)
 #@torch.inference_mode()
-def get_model_answers(model_path, model_id, question_jsons, model_type, num_choices):
+def get_model_answers(model_path, model_id, question_jsons, model_type, num_choices, temperature=0.7):
 
     if model_type == "local":
 
@@ -77,7 +118,25 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
         return ans_jsons
     
     elif model_type == "TogetherAI":
-        breakpoint()
+
+        ans_jsons = []
+        for i, line in enumerate(tqdm(question_jsons)):
+            ques_json = json.loads(line)
+            idx = ques_json["question_id"]
+            qs = ques_json["text"]
+            print("initial question", qs)
+            conv = get_conversation_template(model_id)
+            conv.append_message(conv.roles[0], qs)
+            conv.append_message(conv.roles[1], None)
+            prompt = conv.get_prompt()
+
+            breakpoint()
+
+            output = generate_candidates_with_together_api(prompt, model_id, temperature)
+            print("cleaned output",output)
+            ans_jsons.append({"question_id": idx,
+                             "text": output})
+
     else:
         raise ValueError("Invalid model type! Model Type Given: ", model_type)
 
