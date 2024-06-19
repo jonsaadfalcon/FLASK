@@ -34,8 +34,12 @@ def generate_candidates_with_together_api(instruction:str,
                     {"role": "user", "content": previous_turns["first_instruction"]},
                     {"role": "system", "content": previous_turns["system_response"]},
                     {"role": "user", "content": user_prompt}]
-        
-    print("Messages: ", messages)
+    
+    print("-----------------------------------")
+    print("Messages: ")
+    for message in messages:
+        print(message)
+    print("-----------------------------------")
 
     response = client.chat.completions.create(
                 model=model,
@@ -97,7 +101,7 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
             torch_dtype=torch.float16).cuda()
 
         ans_jsons = []
-        for i, line in enumerate(tqdm(question_jsons[:5])):
+        for i, line in enumerate(tqdm(question_jsons)):
             ques_json = json.loads(line)
             idx = ques_json["question_id"]
             qs = ques_json["text"]
@@ -123,7 +127,7 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
     elif model_type == "TogetherAI":
 
         ans_jsons = []
-        for i, line in enumerate(tqdm(question_jsons)):
+        for i, line in enumerate(tqdm(question_jsons[:5])):
             ques_json = json.loads(line)
             idx = ques_json["question_id"]
             qs = ques_json["text"]
