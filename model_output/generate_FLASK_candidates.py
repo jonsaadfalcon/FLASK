@@ -70,6 +70,7 @@ ranker_config = {
 }
 
 output_dir = "outputs"
+logs_dir = "logs"
 
 #################################################
 
@@ -97,8 +98,12 @@ if not perform_ensembling:
 
         ##########################################
 
-        judgement_command = f"python gen_judgment.py --model-list {model_id} --parallel 2 --judge-model gpt-4"
-        #judgement_command = f"python gpt4_eval.py -q {output_error_file} -a {answer_file} -o {output_review_file} -e {new_output_error_file}"
+        output_error_file = f"{logs_dir}/{model_id}_error.jsonl"
+        output_review_file = f"{logs_dir}/{model_id}_review.jsonl"
+        new_output_error_file = f"{logs_dir}/{model_id}_error_new.jsonl"
+
+        #judgement_command = f"python gen_judgment.py --model-list {model_id} --parallel 2 --judge-model gpt-4"
+        judgement_command = f"python gpt4_eval.py -q {output_error_file} -a {answer_file} -o {output_review_file} -e {new_output_error_file}"
         
         print("Judgement Command: ", judgement_command)
         print("Generating judgements...")
