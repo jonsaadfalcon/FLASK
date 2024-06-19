@@ -107,7 +107,7 @@ if not perform_ensembling:
 
         #judgement_command = f"python gen_judgment.py --model-list {model_id} --parallel 2 --judge-model gpt-4"
         judgement_command = f"python {home_repository}gpt4_eval.py -q '../evaluation_set/flask_evaluation.jsonl' -a {answer_file} -o {output_review_file} -e {output_error_file}"
-        judgement_command += f"-r '{home_repository}/src/reviewer.jsonl'" #" -r '{home_repository}/outputs/{reference_model}_review.jsonl'"
+        judgement_command += f" -r '{home_repository}/src/reviewer.jsonl'" #" -r '{home_repository}/outputs/{reference_model}_review.jsonl'"
         judgement_command += f" -p '{home_repository}/src/prompt.jsonl'"
         
         print("Judgement Command: ", judgement_command)

@@ -128,7 +128,7 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
     elif model_type == "TogetherAI":
 
         ans_jsons = []
-        for i, line in enumerate(tqdm(question_jsons[:5])):
+        for i, line in enumerate(tqdm(question_jsons)):
             ques_json = json.loads(line)
             idx = ques_json["question_id"]
             qs = ques_json["text"]
