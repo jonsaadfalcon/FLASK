@@ -38,8 +38,8 @@ def run_eval(model_path, model_id, question_file, answer_file, num_gpus, model_t
             ans_file.write(json.dumps(line) + "\n")
 
 
-@ray.remote(num_gpus=1)
-@torch.inference_mode()
+#@ray.remote(num_gpus=1)
+#@torch.inference_mode()
 def get_model_answers(model_path, model_id, question_jsons, model_type, num_choices):
 
     if model_type == "local":
