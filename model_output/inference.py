@@ -83,6 +83,7 @@ def run_eval(model_path, model_id, question_file, answer_file, num_gpus, model_t
     for ans_handle in ans_handles:
         ans_jsons.extend(ray.get(ans_handle))
 
+    breakpoint()
     with open(os.path.expanduser(answer_file), "w") as ans_file:
         for line in ans_jsons:
             ans_file.write(json.dumps(line) + "\n")
