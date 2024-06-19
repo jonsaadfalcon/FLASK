@@ -14,11 +14,14 @@ from together import Together
 def generate_candidates_with_together_api(instruction:str, 
                                           model: str, 
                                           temperature: float,
-                                          previous_turns: dict = None):
+                                          previous_turns: dict = None,
+                                          system_prompt: str = None):
     
     client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
 
-    system_prompt = "You are an expert chatbot, capable of instruction-following and question-answering. You are tasked with following the given instruction for the provided input."
+    if system_prompt is None:
+        system_prompt = "You are an expert chatbot, capable of instruction-following and question-answering. You are tasked with following the given instruction for the provided input."
+    
     user_prompt = instruction
 
     ###################################
@@ -32,7 +35,7 @@ def generate_candidates_with_together_api(instruction:str,
                     {"role": "system", "content": previous_turns["system_response"]},
                     {"role": "user", "content": user_prompt}]
         
-    #print("Messages: ", messages)
+    print("Messages: ", messages)
 
     response = client.chat.completions.create(
                 model=model,
@@ -130,12 +133,23 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
             conv.append_message(conv.roles[1], None)
             prompt = conv.get_prompt()
 
-            breakpoint()
+            ############################
 
-            output = generate_candidates_with_together_api(prompt, model_id, temperature)
-            print("cleaned output",output)
+            system_prompt = conv.system
+            previous_turns = {"first_instruction": conv.messages[0][1],
+                              "system_response": conv.messages[1][1]}
+
+            ############################
+
+            output = generate_candidates_with_together_api(instruction=prompt, 
+                                                           model=model_id, 
+                                                           temperature=temperature,
+                                                           previous_turns=previous_turns,
+                                                           system_prompt=system_prompt)
+            print("cleaned output", output)
+            breakpoint()
             ans_jsons.append({"question_id": idx,
-                             "text": output})
+                              "text": output})
 
     else:
         raise ValueError("Invalid model type! Model Type Given: ", model_type)
