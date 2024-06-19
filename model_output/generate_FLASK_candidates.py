@@ -97,11 +97,12 @@ if not perform_ensembling:
 
         ##########################################
 
-        breakpoint()
-
         judgement_command = f"python gen_judgment.py --model-list {model_id} --parallel 2 --judge-model gpt-4"
         #judgement_command = f"python gpt4_eval.py -q {output_error_file} -a {answer_file} -o {output_review_file} -e {new_output_error_file}"
+        
+        print("Judgement Command: ", judgement_command)
         print("Generating judgements...")
+        breakpoint()
         judgement_result = subprocess.run(judgement_command, shell=True, capture_output=True, text=True)
         #breakpoint()
         #with subprocess.Popen(judgement_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as process:
