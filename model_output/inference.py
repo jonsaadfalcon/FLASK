@@ -97,7 +97,7 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
             torch_dtype=torch.float16).cuda()
 
         ans_jsons = []
-        for i, line in enumerate(tqdm(question_jsons)):
+        for i, line in enumerate(tqdm(question_jsons[:5])):
             ques_json = json.loads(line)
             idx = ques_json["question_id"]
             qs = ques_json["text"]
@@ -140,16 +140,27 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
                               "system_response": conv.messages[1][1]}
 
             ############################
+            
+            total_candidates = []
+            for i in range(num_choices):
+                output = generate_candidates_with_together_api(instruction=prompt, 
+                                                            model=model_path, 
+                                                            temperature=temperature,
+                                                            previous_turns=previous_turns,
+                                                            system_prompt=system_prompt)
+                total_candidates.append(output)
 
-            output = generate_candidates_with_together_api(instruction=prompt, 
-                                                           model=model_path, 
-                                                           temperature=temperature,
-                                                           previous_turns=previous_turns,
-                                                           system_prompt=system_prompt)
-            print("cleaned output", output)
+            ############################
+
+            output = total_candidates[0]
+
+            print("Cleaned Output: ", output)
             breakpoint()
             ans_jsons.append({"question_id": idx,
-                              "text": output})
+                              "text": output,
+                              "total_candidates": total_candidates})
+            
+        return ans_jsons
 
     else:
         raise ValueError("Invalid model type! Model Type Given: ", model_type)

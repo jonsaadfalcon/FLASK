@@ -87,7 +87,6 @@ if not perform_ensembling:
 
             print("Generation Command: ", candidate_generation_command)
             print("Generating candidates...")
-            assert False
             #generation_result = subprocess.run(candidate_generation_command, shell=True, capture_output=True, text=True)
             with subprocess.Popen(candidate_generation_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as process:
                 for line in process.stdout:
@@ -97,6 +96,8 @@ if not perform_ensembling:
             print(f"Model {model_name} already has candidates generated. Already saved to: {saved_jsonl_path}")
 
         ##########################################
+
+        breakpoint()
 
         judgement_command = f"python gen_judgment.py --model-list {model_id} --parallel 2 --judge-model gpt-4"
         #judgement_command = f"python gpt4_eval.py -q {output_error_file} -a {answer_file} -o {output_review_file} -e {new_output_error_file}"
@@ -120,7 +121,7 @@ if not perform_ensembling:
         show_results_result = subprocess.run(show_results_command, shell=True, capture_output=True, text=True)
 
         print("------------------------------------------------")
-        print(f"MTBench Results for {model_name}:")
+        print(f"FLASK Results for {model_name}:")
         for line in show_results_result.stdout.split("\n"):
             print(line)
         print("------------------------------------------------")
