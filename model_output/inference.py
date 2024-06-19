@@ -155,7 +155,7 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
             output = total_candidates[0]
 
             print("Cleaned Output: ", output)
-            breakpoint()
+            #breakpoint()
             ans_jsons.append({"question_id": idx,
                               "text": output,
                               "total_candidates": total_candidates})
