@@ -142,7 +142,7 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
             ############################
 
             output = generate_candidates_with_together_api(instruction=prompt, 
-                                                           model=model_id, 
+                                                           model=model_path, 
                                                            temperature=temperature,
                                                            previous_turns=previous_turns,
                                                            system_prompt=system_prompt)
