@@ -92,5 +92,5 @@ if __name__ == "__main__":
     parser.add_argument("--num-choices", type=int, default=1)
     args = parser.parse_args()
 
-    ray.init()
+    #ray.init()
     run_eval(args.model_path, args.model_id, args.question_file, args.answer_file, args.num_gpus, args.model_type, args.num_choices)
