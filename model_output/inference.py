@@ -26,8 +26,10 @@ def run_eval(model_path, model_id, question_file, answer_file, num_gpus, model_t
     chunk_size = len(ques_jsons) // num_gpus
     ans_handles = []
     for i in range(0, len(ques_jsons), chunk_size):
-        ans_handles.append(get_model_answers.remote(model_path, model_id, ques_jsons[i:i + chunk_size],
-                                                    model_type=model_type, num_choices=num_choices))
+        #ans_handles.append(get_model_answers.remote(model_path, model_id, ques_jsons[i:i + chunk_size],
+        #                                            model_type=model_type, num_choices=num_choices))
+        ans_handles.append(get_model_answers(model_path, model_id, ques_jsons[i:i + chunk_size],
+                                             model_type=model_type, num_choices=num_choices))
 
     ans_jsons = []
     for ans_handle in ans_handles:
