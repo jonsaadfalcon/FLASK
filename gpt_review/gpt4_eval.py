@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 import re
 import ast
 
+from tqdm import tqdm
+
 def parse_score(review, num):
     try:
         
@@ -63,7 +65,8 @@ def gen_prompt(reviewer_jsons, prompt_jsons, skills_jsons, response, item):
                 skills+=f"\nScore 4: {scoring['4']}"
                 skills+=f"\nScore 5: {scoring['5']}\n\n"
                 break
-    prompt = prompt_template.format(question=item["text"], response=response, skills=skills, num=3, sample_answer=item["answer"], **defaults)
+    #prompt = prompt_template.format(question=item["text"], response=response, skills=skills, num=3, sample_answer=item["answer"], **defaults)
+    prompt = prompt_template.format(question=item["instruction"], response=response, skills=skills, num=3, sample_answer=item["answer"], **defaults)
     return sys_prompt, prompt
 
 
@@ -108,46 +111,67 @@ if __name__ == '__main__':
     question_copy = []
     answer_copy = []
 
+    print("Questions Length vs. Answer JSONs Length:")
+    print(len(question_idx_list))
+    print(len(answer_jsons))
+
+    min_length_between_QA = min(len(question_idx_list), len(answer_jsons))
+    question_idx_list = question_idx_list[:min_length_between_QA]
+    answer_jsons = answer_jsons[:min_length_between_QA]
+
+    print("Questions Length vs. Answer JSONs Length:")
+    print(len(question_idx_list))
+    print(len(answer_jsons))
+
     requests = []
     for i in question_idx_list:
         for row in answer_jsons:
+            #breakpoint()
+            question_jsons[i]['question_id'] = question_jsons[i]['idx']
+            question_jsons[i]['metrics'] = question_jsons[i]['skill']
             if row.get('question_id') == question_jsons[i]['question_id']:
                 answer_elem = row
                 break
+        
         answer_copy.append(answer_elem)
-        assert answer_copy[i]['question_id'] == question_jsons[i]['question_id']
-        question_copy.append(question_jsons[i])
-        sys_prompt, prompt = gen_prompt(reviewer_jsons, prompt_jsons, skills_jsons,answer_copy[i]["text"], question_jsons[i])
-        print(prompt)
-        review_id = shortuuid.uuid()
-        review_jsons.append({
-            'review_id': review_id,
-            'question_id': question_jsons[i]['question_id'],
-            'metadata': {},
-        })
-        requests.append(
-            {
+        #assert answer_copy[i]['question_id'] == question_jsons[i]['question_id']
+        if answer_copy[i]['question_id'] == question_jsons[i]['question_id']:
+            question_copy.append(question_jsons[i])
+            sys_prompt, prompt = gen_prompt(reviewer_jsons, prompt_jsons, skills_jsons,answer_copy[i]["text"], question_jsons[i])
+            print(prompt)
+            review_id = shortuuid.uuid()
+            review_jsons.append({
                 'review_id': review_id,
                 'question_id': question_jsons[i]['question_id'],
                 'metadata': {},
-                'request': {
-                    "model": "gpt-4-0613",
-                    "messages":[
-                        {
-                            'role': 'system',
-                            'content': sys_prompt
-                        },
-                        {
-                            'role': 'user',
-                            'content': prompt,
-                        }
-                    ]
-                },
-                # setting temperature 0 for reproducibility
-                "temperature": 0,
-                "max_tokens": args.max_tokens
-            }
-        )
+            })
+            requests.append(
+                {
+                    'review_id': review_id,
+                    'question_id': question_jsons[i]['question_id'],
+                    'metadata': {},
+                    'request': {
+                        "model": "gpt-4-0613",
+                        "messages":[
+                            {
+                                'role': 'system',
+                                'content': sys_prompt
+                            },
+                            {
+                                'role': 'user',
+                                'content': prompt,
+                            }
+                        ]
+                    },
+                    # setting temperature 0 for reproducibility
+                    "temperature": 0,
+                    "max_tokens": args.max_tokens
+                }
+            )
+        else:
+            print("Error matching question IDs:")
+            print(f"Answer QID: {answer_copy[i]['question_id']}")
+            print(f"Question QID: {question_jsons[i]['question_id']}")
 
     openai_concurrent = OpenAIChatCompletionConcurrent(api_keys=key_jsons["api_keys"], requests_per_minute=60, expected_response_seconds=5)
     responses, fails = openai_concurrent.create_many(requests)
@@ -158,6 +182,8 @@ if __name__ == '__main__':
 
     output_directory = os.path.dirname(args.output_error_file)
 
+    print(f"Output Directory: {output_directory}")
+
     # Check if the directory exists, if not, create it
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
@@ -166,7 +192,7 @@ if __name__ == '__main__':
     if len(fails)>0:
         with open(f'{args.output_error_file}', 'w') as output_error_file:
             try:
-                for idx, fail in enumerate(fails):
+                for idx, fail in tqdm(enumerate(fails)):
                     print("fail:", fail)
                     for index, item in enumerate(question_copy):
                         if int(item.get("question_id")) == int(fail['question_id']):
@@ -180,7 +206,7 @@ if __name__ == '__main__':
     question_copy = [item for index, item in enumerate(question_copy) if index not in delete_index]
 
     with open(f'{args.output_review_file}', 'a') as output_review_file:
-        for idx, review in enumerate(reviews):
+        for idx, review in tqdm(enumerate(reviews)):
             num = 3
             scores = parse_score(review, num)
             review_jsons[idx] = question_copy[idx]
@@ -202,6 +228,7 @@ if __name__ == '__main__':
         output_read_file.close()
     json_objects = [json.loads(line) for line in lines]
     sorted_objects = sorted(json_objects, key=lambda obj: obj.get('question_id'))
+    #sorted_objects = sorted(json_objects, key=lambda obj: obj.get('idx'))
 
     with open(f'{args.output_review_file}', 'w') as output_write_file:
         for obj in sorted_objects:
