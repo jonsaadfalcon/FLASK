@@ -13,6 +13,7 @@ import fcntl
 from typing import List
 import os
 
+from tqdm import tqdm
 
 from tenacity import (
     retry,
@@ -68,7 +69,7 @@ class OpenAIChatCompletionConcurrent:
 
         futures = []
         with ProcessPoolExecutor(max_workers=self.num_workers) as executor:
-            for item_index, item in enumerate(requests):
+            for item_index, item in tqdm(enumerate(requests)):
                 api_key = self.api_keys[item_index % self.num_api_keys]    
                 future = executor.submit(call_and_return, api_key=api_key, item=item)
                 futures.append(future)

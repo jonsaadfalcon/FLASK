@@ -1,0 +1,141 @@
+nohup: ignoring input
+Generating candidates for model: Qwen/Qwen1.5-7B-Chat
+Generation Command:  python inference.py --model-path Qwen/Qwen1.5-7B-Chat --model-id Qwen1.5-7B-Chat --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file outputs/Qwen1.5-7B-Chat.jsonl --num-gpus 1 --model-type HuggingFace --num-choices 10
+Generating candidates...
+Judgement Command:  python /future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review/gpt4_eval.py -q '../evaluation_set/flask_evaluation.jsonl' -a outputs/Qwen1.5-7B-Chat.jsonl -o logs/Qwen1.5-7B-Chat_review.jsonl -e logs/Qwen1.5-7B-Chat_error.jsonl -r '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/reviewer.jsonl' -p '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/prompt.jsonl'
+Generating judgements...
+------------------------------------------------
+Judgement Results for Qwen/Qwen1.5-7B-Chat:
+
+------------------------------------------------
+Showing results...
+------------------------------------------------
+FLASK Results for Qwen/Qwen1.5-7B-Chat:
+
+------------------------------------------------
+Generating candidates for model: meta-llama/Meta-Llama-3-8B-Instruct
+Generation Command:  python inference.py --model-path meta-llama/Meta-Llama-3-8B-Instruct --model-id Meta-Llama-3-8B-Instruct --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file outputs/Meta-Llama-3-8B-Instruct.jsonl --num-gpus 1 --model-type HuggingFace --num-choices 10
+Generating candidates...
+Judgement Command:  python /future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review/gpt4_eval.py -q '../evaluation_set/flask_evaluation.jsonl' -a outputs/Meta-Llama-3-8B-Instruct.jsonl -o logs/Meta-Llama-3-8B-Instruct_review.jsonl -e logs/Meta-Llama-3-8B-Instruct_error.jsonl -r '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/reviewer.jsonl' -p '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/prompt.jsonl'
+Generating judgements...
+------------------------------------------------
+Judgement Results for meta-llama/Meta-Llama-3-8B-Instruct:
+
+------------------------------------------------
+Showing results...
+------------------------------------------------
+FLASK Results for meta-llama/Meta-Llama-3-8B-Instruct:
+
+------------------------------------------------
+Generating candidates for model: Nexusflow/Starling-LM-7B-beta
+Generation Command:  python inference.py --model-path Nexusflow/Starling-LM-7B-beta --model-id Starling-LM-7B-beta --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file outputs/Starling-LM-7B-beta.jsonl --num-gpus 1 --model-type HuggingFace --num-choices 10
+Generating candidates...
+Judgement Command:  python /future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review/gpt4_eval.py -q '../evaluation_set/flask_evaluation.jsonl' -a outputs/Starling-LM-7B-beta.jsonl -o logs/Starling-LM-7B-beta_review.jsonl -e logs/Starling-LM-7B-beta_error.jsonl -r '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/reviewer.jsonl' -p '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/prompt.jsonl'
+Generating judgements...
+------------------------------------------------
+Judgement Results for Nexusflow/Starling-LM-7B-beta:
+
+------------------------------------------------
+Showing results...
+------------------------------------------------
+FLASK Results for Nexusflow/Starling-LM-7B-beta:
+
+------------------------------------------------
+Generating candidates for model: berkeley-nest/Starling-LM-7B-alpha
+Generation Command:  python inference.py --model-path berkeley-nest/Starling-LM-7B-alpha --model-id Starling-LM-7B-alpha --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file outputs/Starling-LM-7B-alpha.jsonl --num-gpus 1 --model-type HuggingFace --num-choices 10
+Generating candidates...
+Judgement Command:  python /future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review/gpt4_eval.py -q '../evaluation_set/flask_evaluation.jsonl' -a outputs/Starling-LM-7B-alpha.jsonl -o logs/Starling-LM-7B-alpha_review.jsonl -e logs/Starling-LM-7B-alpha_error.jsonl -r '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/reviewer.jsonl' -p '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/prompt.jsonl'
+Generating judgements...
+------------------------------------------------
+Judgement Results for berkeley-nest/Starling-LM-7B-alpha:
+
+------------------------------------------------
+Showing results...
+------------------------------------------------
+FLASK Results for berkeley-nest/Starling-LM-7B-alpha:
+
+------------------------------------------------
+Generating candidates for model: teknium/OpenHermes-2.5-Mistral-7B
+Generation Command:  python inference.py --model-path teknium/OpenHermes-2.5-Mistral-7B --model-id OpenHermes-2.5-Mistral-7B --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file outputs/OpenHermes-2.5-Mistral-7B.jsonl --num-gpus 1 --model-type HuggingFace --num-choices 10
+Generating candidates...
+Judgement Command:  python /future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review/gpt4_eval.py -q '../evaluation_set/flask_evaluation.jsonl' -a outputs/OpenHermes-2.5-Mistral-7B.jsonl -o logs/OpenHermes-2.5-Mistral-7B_review.jsonl -e logs/OpenHermes-2.5-Mistral-7B_error.jsonl -r '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/reviewer.jsonl' -p '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/prompt.jsonl'
+Generating judgements...
+------------------------------------------------
+Judgement Results for teknium/OpenHermes-2.5-Mistral-7B:
+
+------------------------------------------------
+Showing results...
+------------------------------------------------
+FLASK Results for teknium/OpenHermes-2.5-Mistral-7B:
+
+------------------------------------------------
+Generating candidates for model: mistralai/Mistral-7B-Instruct-v0.2
+Generation Command:  python inference.py --model-path mistralai/Mistral-7B-Instruct-v0.2 --model-id Mistral-7B-Instruct-v0.2 --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file outputs/Mistral-7B-Instruct-v0.2.jsonl --num-gpus 1 --model-type HuggingFace --num-choices 10
+Generating candidates...
+Judgement Command:  python /future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review/gpt4_eval.py -q '../evaluation_set/flask_evaluation.jsonl' -a outputs/Mistral-7B-Instruct-v0.2.jsonl -o logs/Mistral-7B-Instruct-v0.2_review.jsonl -e logs/Mistral-7B-Instruct-v0.2_error.jsonl -r '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/reviewer.jsonl' -p '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/prompt.jsonl'
+Generating judgements...
+------------------------------------------------
+Judgement Results for mistralai/Mistral-7B-Instruct-v0.2:
+
+------------------------------------------------
+Showing results...
+------------------------------------------------
+FLASK Results for mistralai/Mistral-7B-Instruct-v0.2:
+
+------------------------------------------------
+Generating candidates for model: cognitivecomputations/dolphin-2.2.1-mistral-7b
+Generation Command:  python inference.py --model-path cognitivecomputations/dolphin-2.2.1-mistral-7b --model-id dolphin-2.2.1-mistral-7b --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file outputs/dolphin-2.2.1-mistral-7b.jsonl --num-gpus 1 --model-type HuggingFace --num-choices 10
+Generating candidates...
+Judgement Command:  python /future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review/gpt4_eval.py -q '../evaluation_set/flask_evaluation.jsonl' -a outputs/dolphin-2.2.1-mistral-7b.jsonl -o logs/dolphin-2.2.1-mistral-7b_review.jsonl -e logs/dolphin-2.2.1-mistral-7b_error.jsonl -r '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/reviewer.jsonl' -p '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/prompt.jsonl'
+Generating judgements...
+------------------------------------------------
+Judgement Results for cognitivecomputations/dolphin-2.2.1-mistral-7b:
+
+------------------------------------------------
+Showing results...
+------------------------------------------------
+FLASK Results for cognitivecomputations/dolphin-2.2.1-mistral-7b:
+
+------------------------------------------------
+Generating candidates for model: microsoft/Phi-3-mini-4k-instruct
+Generation Command:  python inference.py --model-path microsoft/Phi-3-mini-4k-instruct --model-id Phi-3-mini-4k-instruct --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file outputs/Phi-3-mini-4k-instruct.jsonl --num-gpus 1 --model-type HuggingFace --num-choices 10
+Generating candidates...
+Judgement Command:  python /future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review/gpt4_eval.py -q '../evaluation_set/flask_evaluation.jsonl' -a outputs/Phi-3-mini-4k-instruct.jsonl -o logs/Phi-3-mini-4k-instruct_review.jsonl -e logs/Phi-3-mini-4k-instruct_error.jsonl -r '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/reviewer.jsonl' -p '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/prompt.jsonl'
+Generating judgements...
+------------------------------------------------
+Judgement Results for microsoft/Phi-3-mini-4k-instruct:
+
+------------------------------------------------
+Showing results...
+------------------------------------------------
+FLASK Results for microsoft/Phi-3-mini-4k-instruct:
+
+------------------------------------------------
+Generating candidates for model: HuggingFaceH4/zephyr-7b-beta
+Generation Command:  python inference.py --model-path HuggingFaceH4/zephyr-7b-beta --model-id zephyr-7b-beta --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file outputs/zephyr-7b-beta.jsonl --num-gpus 1 --model-type HuggingFace --num-choices 10
+Generating candidates...
+Judgement Command:  python /future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review/gpt4_eval.py -q '../evaluation_set/flask_evaluation.jsonl' -a outputs/zephyr-7b-beta.jsonl -o logs/zephyr-7b-beta_review.jsonl -e logs/zephyr-7b-beta_error.jsonl -r '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/reviewer.jsonl' -p '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/prompt.jsonl'
+Generating judgements...
+------------------------------------------------
+Judgement Results for HuggingFaceH4/zephyr-7b-beta:
+
+------------------------------------------------
+Showing results...
+------------------------------------------------
+FLASK Results for HuggingFaceH4/zephyr-7b-beta:
+
+------------------------------------------------
+Generating candidates for model: microsoft/Phi-3-small-8k-instruct
+Generation Command:  python inference.py --model-path microsoft/Phi-3-small-8k-instruct --model-id Phi-3-small-8k-instruct --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file outputs/Phi-3-small-8k-instruct.jsonl --num-gpus 1 --model-type HuggingFace --num-choices 10
+Generating candidates...
+Judgement Command:  python /future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review/gpt4_eval.py -q '../evaluation_set/flask_evaluation.jsonl' -a outputs/Phi-3-small-8k-instruct.jsonl -o logs/Phi-3-small-8k-instruct_review.jsonl -e logs/Phi-3-small-8k-instruct_error.jsonl -r '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/reviewer.jsonl' -p '/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review//src/prompt.jsonl'
+Generating judgements...
+------------------------------------------------
+Judgement Results for microsoft/Phi-3-small-8k-instruct:
+
+------------------------------------------------
+Showing results...
+------------------------------------------------
+FLASK Results for microsoft/Phi-3-small-8k-instruct:
+
+------------------------------------------------

@@ -35,24 +35,31 @@ from datasets import Dataset, concatenate_datasets
 # Parameters
 
 # Mixture of Agents Models
-models = ["Qwen/Qwen1.5-72B-Chat", "Qwen/Qwen1.5-110B-Chat", "microsoft/WizardLM-2-8x22B",
-          "mistralai/Mixtral-8x22B-Instruct-v0.1", "meta-llama/Llama-3-70b-chat-hf", "databricks/dbrx-instruct"]
-MoA_models = models
+#models = ["Qwen/Qwen2-72B-Instruct", "microsoft/WizardLM-2-8x22B",
+#          "mistralai/Mixtral-8x22B-Instruct-v0.1", "meta-llama/Llama-3-70b-chat-hf", "databricks/dbrx-instruct"]
 
-#models = ["Qwen/Qwen1.5-72B-Chat"]
-models = ["mistralai/Mixtral-8x22B-Instruct-v0.1"]
+# SimPO Models
+models = ["Qwen/Qwen2-7B-Instruct", "princeton-nlp/Llama-3-Instruct-8B-SimPO", "princeton-nlp/Llama-3-Instruct-8B-IPO",
+          "princeton-nlp/Llama-3-Instruct-8B-RDPO", "princeton-nlp/Llama-3-Instruct-8B-DPO"]
+
+#models = ["Qwen/Qwen1.5-7B-Chat","meta-llama/Meta-Llama-3-8B-Instruct", "Nexusflow/Starling-LM-7B-beta", 
+#          "berkeley-nest/Starling-LM-7B-alpha", "teknium/OpenHermes-2.5-Mistral-7B", "mistralai/Mistral-7B-Instruct-v0.2",
+#          "cognitivecomputations/dolphin-2.2.1-mistral-7b", "microsoft/Phi-3-mini-4k-instruct", #"upstage/SOLAR-10.7B-Instruct-v1.0",
+#          "HuggingFaceH4/zephyr-7b-beta", "microsoft/Phi-3-small-8k-instruct"]
 
 
 # Generation Settings
 generation_dict = {
     "batch_size": 8,
     "temperatures": [0.7], #0.9 #1.5
-    "candidates_per_temp": [1],
-    "generation_max_length": 512,
-    "dataset_cutoff": 4, #3, None
+    "candidates_per_temp": [10],
+    "generation_max_length": 1024, # 1024 for FLASK specifically
     #"top_k": 10,
     #"top_p": 0.9
 }
+
+togetherai_models = ["Qwen/Qwen2-72B-Instruct", "microsoft/WizardLM-2-8x22B",
+                     "mistralai/Mixtral-8x22B-Instruct-v0.1", "meta-llama/Llama-3-70b-chat-hf", "databricks/dbrx-instruct"]
 
 #################################################
 
@@ -69,7 +76,8 @@ ranker_config = {
     "device": "cuda:0"
 }
 
-home_repository = "/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review/"
+#home_repository = "/future/u/jonsf/AI_Sys_Lab/PretrainingObjectives/pretraining/ensembling/FLASK/gpt_review/"
+home_repository = "/home/jon/PretrainingObjectives/pretraining/ensembling/FLASK/model_output"
 reference_model = "gpt4"
 
 output_dir = "outputs"
@@ -86,11 +94,16 @@ if not perform_ensembling:
         model_id = model_name.split("/")[1]
         answer_file = f"{output_dir}/{model_id}.jsonl"
         if not os.path.exists(answer_file):
-            candidate_generation_command = f"python inference.py --model-path {model_name} --model-id {model_id} --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file {answer_file} --num-gpus 1"
-            candidate_generation_command += f" --model-type TogetherAI --num-choices {generation_dict['candidates_per_temp'][0]}"
+            if model_name in togetherai_models:
+                candidate_generation_command = f"python inference.py --model-path {model_name} --model-id {model_id} --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file {answer_file} --num-gpus 1"
+                candidate_generation_command += f" --model-type TogetherAI --num-choices {generation_dict['candidates_per_temp'][0]}"
+            else:
+                candidate_generation_command = f"python inference.py --model-path {model_name} --model-id {model_id} --question-file ../input_data/flask_evaluation_raw.jsonl --answer-file {answer_file} --num-gpus 1"
+                candidate_generation_command += f" --model-type HuggingFace --num-choices {generation_dict['candidates_per_temp'][0]}"
 
             print("Generation Command: ", candidate_generation_command)
             print("Generating candidates...")
+            #breakpoint()
             #generation_result = subprocess.run(candidate_generation_command, shell=True, capture_output=True, text=True)
             with subprocess.Popen(candidate_generation_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as process:
                 for line in process.stdout:
@@ -112,7 +125,7 @@ if not perform_ensembling:
         
         print("Judgement Command: ", judgement_command)
         print("Generating judgements...")
-        breakpoint()
+        #breakpoint()
         judgement_result = subprocess.run(judgement_command, shell=True, capture_output=True, text=True)
         #breakpoint()
         #with subprocess.Popen(judgement_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as process:

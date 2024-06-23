@@ -9,6 +9,9 @@ from load_model import get_conversation_template
 
 from together import Together
 
+import transformers
+from transformers import AutoTokenizer, GenerationConfig
+
 ##################################################
 
 def generate_candidates_with_together_api(instruction:str, 
@@ -32,14 +35,14 @@ def generate_candidates_with_together_api(instruction:str,
     else:
         messages = [{"role": "system", "content": system_prompt},
                     {"role": "user", "content": previous_turns["first_instruction"]},
-                    {"role": "system", "content": previous_turns["system_response"]},
+                    {"role": "assistant", "content": previous_turns["system_response"]},
                     {"role": "user", "content": user_prompt}]
     
-    print("-----------------------------------")
-    print("Messages: ")
-    for message in messages:
-        print(message)
-    print("-----------------------------------")
+    #print("-----------------------------------")
+    #print("Messages: ")
+    #for message in messages:
+    #    print(message)
+    #print("-----------------------------------")
 
     response = client.chat.completions.create(
                 model=model,
@@ -52,6 +55,108 @@ def generate_candidates_with_together_api(instruction:str,
     output = response.choices[0].message.content
 
     return output
+
+##################################################
+
+def load_HF_pipeline(model_path: str, max_new_tokens: int):
+
+        model_id = model_path
+        model = model_path
+    
+        if model == "microsoft/Phi-3-small-8k-instruct":
+            pipeline = transformers.pipeline(
+                "text-generation",
+                model=model_id,
+                tokenizer=AutoTokenizer.from_pretrained(model_id, trust_remote_code=True),
+                model_kwargs={"torch_dtype": torch.bfloat16},
+                device_map="auto",
+                trust_remote_code=True
+            )
+        else:
+            pipeline = transformers.pipeline(
+                "text-generation",
+                model=model_id,
+                #model_kwargs={"torch_dtype": torch.bfloat16} if model == "meta-llama/Meta-Llama-3-8B-Instruct" else {"torch_dtype": "auto"},
+                #model_kwargs={"torch_dtype": "auto"},
+                model_kwargs={"torch_dtype": torch.bfloat16},
+                device_map="auto",
+                trust_remote_code=True
+            )
+
+        pipeline.model.config.pad_token_id = pipeline.tokenizer.eos_token_id
+        pipeline.tokenizer.pad_token_id = pipeline.tokenizer.eos_token_id
+        if model in ["meta-llama/Meta-Llama-3-8B-Instruct", "princeton-nlp/Llama-3-Instruct-8B-SimPO", "princeton-nlp/Llama-3-Instruct-8B-IPO", 
+                 "princeton-nlp/Llama-3-Instruct-8B-RDPO", "princeton-nlp/Llama-3-Instruct-8B-DPO"]:
+            pipeline.tokenizer.padding_side = 'left'
+
+        pipeline.model.config.is_encoder_decoder = False
+
+        ########################################
+
+        terminators = [
+                pipeline.tokenizer.eos_token_id,
+                pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>")
+        ]
+
+        ########################################
+
+        generation_config, unused_kwargs = GenerationConfig.from_pretrained(
+            model_id, 
+            return_unused_kwargs=True
+        )
+
+        generation_config.batch_size = 1
+        
+        generation_config.max_new_tokens = max_new_tokens
+        generation_config.do_sample = True
+        #generation_config.temperature = temperature
+        generation_config.top_p = 0.9
+        generation_config.num_return_sequences = 1
+        generation_config.is_encoder_decoder = False
+        generation_config.eos_token_id = terminators if model in ["meta-llama/Meta-Llama-3-8B-Instruct"] else pipeline.tokenizer.eos_token_id
+        if model in ["meta-llama/Meta-Llama-3-8B-Instruct", "princeton-nlp/Llama-3-Instruct-8B-SimPO", "princeton-nlp/Llama-3-Instruct-8B-IPO", 
+                 "princeton-nlp/Llama-3-Instruct-8B-RDPO", "princeton-nlp/Llama-3-Instruct-8B-DPO"]:
+            generation_config.pretraining_tp = 1
+        
+        pipeline.model.config = generation_config
+
+        return pipeline, generation_config
+
+##################################################
+
+def generate_candidates_with_huggingface_locally(instruction:str, 
+                                                 pipeline: transformers.pipeline,
+                                                 generation_config: GenerationConfig,
+                                                 previous_turns: dict = None):
+    
+    system_prompt = "You are an expert chatbot, capable of instruction-following and question-answering. You are tasked with following the given instruction for the provided input."
+    user_prompt = instruction
+            
+    if previous_turns is None:
+        messages = [{"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}]
+    else:
+        messages = [{"role": "system", "content": system_prompt},
+                    {"role": "user", "content": previous_turns["first_instruction"]},
+                    {"role": "assistant", "content": previous_turns["system_response"]},
+                    {"role": "user", "content": user_prompt}]
+            
+    prompt = pipeline.tokenizer.apply_chat_template(
+            messages, 
+            tokenize=False, 
+            add_generation_prompt=True
+    )
+    prompt_length = len(prompt)
+
+    outputs = pipeline(
+        prompt,
+        batch_size=generation_config.batch_size,
+        generation_config=generation_config
+    )
+
+    answer = outputs[0]["generated_text"][prompt_length:]
+    return answer
+                                                 
 
 ##################################################
 
@@ -91,7 +196,7 @@ def run_eval(model_path, model_id, question_file, answer_file, num_gpus, model_t
 
 #@ray.remote(num_gpus=1)
 #@torch.inference_mode()
-def get_model_answers(model_path, model_id, question_jsons, model_type, num_choices, temperature=0.7):
+def get_model_answers(model_path, model_id, question_jsons, model_type, num_choices, temperature=0.7, max_new_tokens=1024):
 
     if model_type == "local":
 
@@ -116,8 +221,8 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
             output_ids = model.generate(
                 torch.as_tensor(inputs.input_ids).cuda(),
                 do_sample=True,
-                temperature=0.7,
-                max_new_tokens=1024)
+                temperature=temperature,
+                max_new_tokens=max_new_tokens)
             output_ids = output_ids[0][len(inputs.input_ids[0]) :]
             outputs = tokenizer.decode(output_ids, skip_special_tokens=True).strip()
             print("cleaned output",outputs)
@@ -162,6 +267,56 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
             output = total_candidates[0]
 
             print("Cleaned Output: ", output)
+            #breakpoint()
+            ans_jsons.append({"question_id": idx,
+                              "text": output,
+                              "total_candidates": total_candidates})
+            
+        return ans_jsons
+    
+    elif model_type == "HuggingFace":
+
+        pipeline, generation_config = load_HF_pipeline(model_path, max_new_tokens) 
+
+        ans_jsons = []
+        for i, line in enumerate(tqdm(question_jsons)):
+            ques_json = json.loads(line)
+            idx = ques_json["question_id"]
+            qs = ques_json["text"]
+            print("initial question", qs)
+            conv = get_conversation_template(model_id)
+            conv.append_message(conv.roles[0], qs)
+            conv.append_message(conv.roles[1], None)
+            prompt = conv.get_prompt()
+
+            ############################
+
+            instruction = qs
+            system_prompt = conv.system
+            previous_turns = {"first_instruction": conv.messages[0][1],
+                              "system_response": conv.messages[1][1]}
+
+            ############################
+            
+            total_candidates = []
+            for i in range(num_choices):
+                output = generate_candidates_with_huggingface_locally(instruction=instruction,
+                                                                      pipeline=pipeline,
+                                                                      generation_config=generation_config,
+                                                                      previous_turns=None)
+                                                                      #previous_turns=previous_turns)
+                total_candidates.append(output)
+
+                if i % 10 == 0:
+                    print(f"Instruction: {instruction}")
+                    print(f"Output: {output}")
+                    print("-----------------------------------------")
+
+            ############################
+
+            output = total_candidates[0]
+
+            #print("Cleaned Output: ", output)
             #breakpoint()
             ans_jsons.append({"question_id": idx,
                               "text": output,
