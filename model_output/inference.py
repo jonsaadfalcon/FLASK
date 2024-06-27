@@ -4,7 +4,7 @@ import torch
 import os
 import json
 from tqdm import tqdm
-import ray
+#import ray
 from load_model import get_conversation_template
 
 from together import Together
@@ -160,6 +160,21 @@ def generate_candidates_with_huggingface_locally(instruction:str,
 
 ##################################################
 
+def search_string_in_jsonl(file_path, search_string):
+    if not os.path.exists(file_path):
+        return False
+    
+    found = False
+    with open(file_path, 'r', encoding='utf-8') as file:
+        for line in file:
+            if search_string in line:
+                found = True
+                break
+                #print(f"Found the string in line: {line.strip()}")
+    #if not found:
+     #   print(f"The string '{search_string}' was not found in the file.")
+    return found
+
 def disable_torch_init():
     """
     Disable the redundant torch default initialization to accelerate model creation.
@@ -176,22 +191,28 @@ def run_eval(model_path, model_id, question_file, answer_file, num_gpus, model_t
         for line in ques_file:
             ques_jsons.append(line)
 
-    chunk_size = len(ques_jsons) // num_gpus
+    #chunk_size = len(ques_jsons) // num_gpus
+    chunk_size = 50
     ans_handles = []
     for i in range(0, len(ques_jsons), chunk_size):
-        #ans_handles.append(get_model_answers.remote(model_path, model_id, ques_jsons[i:i + chunk_size],
-        #                                            model_type=model_type, num_choices=num_choices))
-        ans_handles.append(get_model_answers(model_path, model_id, ques_jsons[i:i + chunk_size],
-                                             model_type=model_type, num_choices=num_choices))
+        question_string = f'"question_id": {i + 1}'
+        if not search_string_in_jsonl(answer_file, question_string):
+            print(f"Generating answers for questions {i} to {i + chunk_size}")
+            #ans_handles.append(get_model_answers.remote(model_path, model_id, ques_jsons[i:i + chunk_size],
+            #                                            model_type=model_type, num_choices=num_choices))
+            ans_handles.append(get_model_answers(model_path, model_id, ques_jsons[i:i + chunk_size],
+                                                model_type=model_type, num_choices=num_choices))
 
-    ans_jsons = []
-    for ans_handle in ans_handles:
-        #ans_jsons.extend(ray.get(ans_handle))
-        ans_jsons.extend(ans_handle)
+            ans_jsons = []
+            for ans_handle in ans_handles:
+                #ans_jsons.extend(ray.get(ans_handle))
+                ans_jsons.extend(ans_handle)
 
-    with open(os.path.expanduser(answer_file), "w") as ans_file:
-        for line in ans_jsons:
-            ans_file.write(json.dumps(line) + "\n")
+            with open(os.path.expanduser(answer_file), "w") as ans_file:
+                for line in ans_jsons:
+                    ans_file.write(json.dumps(line) + "\n")
+        else:
+            print(f"Answers for questions {i} to {i + chunk_size} already exist in {answer_file}")
 
 
 #@ray.remote(num_gpus=1)
@@ -211,7 +232,7 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
             ques_json = json.loads(line)
             idx = ques_json["question_id"]
             qs = ques_json["text"]
-            print("initial question", qs)
+            #print("initial question", qs)
             conv = get_conversation_template(model_id)
             conv.append_message(conv.roles[0], qs)
             conv.append_message(conv.roles[1], None)
@@ -225,7 +246,9 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
                 max_new_tokens=max_new_tokens)
             output_ids = output_ids[0][len(inputs.input_ids[0]) :]
             outputs = tokenizer.decode(output_ids, skip_special_tokens=True).strip()
-            print("cleaned output",outputs)
+            if i % 10:
+                print("initial question", qs)
+                print("cleaned output",outputs)
             ans_jsons.append({"question_id": idx,
                              "text": outputs})
         return ans_jsons
@@ -237,7 +260,7 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
             ques_json = json.loads(line)
             idx = ques_json["question_id"]
             qs = ques_json["text"]
-            print("initial question", qs)
+            #print("initial question", qs)
             conv = get_conversation_template(model_id)
             conv.append_message(conv.roles[0], qs)
             conv.append_message(conv.roles[1], None)
@@ -253,7 +276,7 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
             ############################
             
             total_candidates = []
-            for i in range(num_choices):
+            for _ in range(num_choices):
                 output = generate_candidates_with_together_api(instruction=instruction, 
                                                                model=model_path, 
                                                                temperature=temperature,
@@ -266,8 +289,10 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
 
             output = total_candidates[0]
 
-            print("Cleaned Output: ", output)
-            #breakpoint()
+            #print("Cleaned Output: ", output)
+            if i % 10:
+                print("initial question", qs)
+                print("cleaned output",outputs)
             ans_jsons.append({"question_id": idx,
                               "text": output,
                               "total_candidates": total_candidates})
@@ -299,7 +324,7 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
             ############################
             
             total_candidates = []
-            for i in range(num_choices):
+            for _ in range(num_choices):
                 output = generate_candidates_with_huggingface_locally(instruction=instruction,
                                                                       pipeline=pipeline,
                                                                       generation_config=generation_config,
@@ -307,10 +332,10 @@ def get_model_answers(model_path, model_id, question_jsons, model_type, num_choi
                                                                       #previous_turns=previous_turns)
                 total_candidates.append(output)
 
-                if i % 10 == 0:
-                    print(f"Instruction: {instruction}")
-                    print(f"Output: {output}")
-                    print("-----------------------------------------")
+            if i % 10 == 0:
+                print(f"Instruction: {instruction}")
+                print(f"Output: {output}")
+                print("-----------------------------------------")
 
             ############################
 
